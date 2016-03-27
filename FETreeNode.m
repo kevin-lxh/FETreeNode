@@ -152,123 +152,62 @@
     }
 }
 
-- (FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType {
-    NSUInteger cursor = 0;
-    if (searchType == FETreeNodeSearchTypeDepthFirst) {
-        return [self depthFirstSearchNodeAtIndex:index cursor:&cursor];
-    }
-    
-    return [self breadthFirstSearchNodeAtIndex:index nodes:@[self] cursor:&cursor];
-}
-
-- (NSUInteger)indexOfNode:(FETreeNode*)node searchType:(FETreeNodeSearchType)searchType {
-    NSUInteger cursor = 0;
-    if (searchType == FETreeNodeSearchTypeDepthFirst) {
-        return [self depthFirstSearchIndexOfNode:node cursor:&cursor];
-    }
-    
-    return [self breadthFirstSearchIndexOfNode:node inNodes:@[self] cursor:&cursor];
-}
-
 - (void)enumerateNodesWithSearchType:(FETreeNodeSearchType)searchType usingBlock:(FETreeNodeEnumerationBlock)aBlock {
     NSUInteger cursor = 0;
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
     
     if (searchType == FETreeNodeSearchTypeDepthFirst) {
-        [self depthFirstEnumerateNodesUsingBlock:aBlock indexPath:indexPath cursor:&cursor];
+        BOOL stop = NO;
+        [self depthFirstEnumerateNodesUsingBlock:aBlock indexPath:indexPath cursor:&cursor stop:&stop];
     }
+    else {
+        [self breadthFirstEnumerateNodesUsingBlock:aBlock nodes:@[self] indexPaths:@[indexPath] cursor:&cursor];
+    }
+}
+
+- (FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType {
+    __block FETreeNode *result = nil;
+    [self enumerateNodesWithSearchType:searchType
+                            usingBlock:^(FETreeNode *node, NSIndexPath *indexPath, NSUInteger i, BOOL *stop) {
+        if (index == i) {
+            result = node;
+            *stop = YES;
+        }
+    }];
     
-    [self breadthFirstEnumerateNodesUsingBlock:aBlock nodes:@[self] indexPaths:@[indexPath] cursor:&cursor];
+    return result;
+}
+
+- (NSUInteger)indexOfNode:(FETreeNode*)node searchType:(FETreeNodeSearchType)searchType {
+    __block NSUInteger result = NSNotFound;
+    [self enumerateNodesWithSearchType:searchType
+                            usingBlock:^(FETreeNode *n, NSIndexPath *indexPath, NSUInteger index, BOOL *stop) {
+        if (node == n) {
+            result = index;
+            *stop = YES;
+        }
+    }];
+    
+    return result;
 }
 
 #pragma mark - Private
-- (FETreeNode*)depthFirstSearchNodeAtIndex:(NSUInteger)index cursor:(NSUInteger*)cursor {
-    if (*cursor == index) {
-        return self;
-    }
-    else {
-        NSInteger numberOfDescendantNodes = [self numberOfDescendantNodes];
-        
-        if (*cursor + numberOfDescendantNodes >= index) {
-            for (FETreeNode *childNode in self.innerChildNodes) {
-                *cursor += 1;
-                FETreeNode *result = [childNode depthFirstSearchNodeAtIndex:index cursor:cursor];
-                if (result) {
-                    return result;
-                }
-            }
-        }
-        else {
-            *cursor += numberOfDescendantNodes;
-        }
-    }
-    
-    return nil;
-}
+- (void)depthFirstEnumerateNodesUsingBlock:(FETreeNodeEnumerationBlock)aBlock indexPath:(NSIndexPath*)indexPath cursor:(NSUInteger*)cursor stop:(BOOL*)stop {
 
-- (FETreeNode*)breadthFirstSearchNodeAtIndex:(NSUInteger)index nodes:(NSArray*)nodes cursor:(NSUInteger*)cursor {
-    if (nodes.count == 0) {
-        return nil;
+    aBlock(self, indexPath, *cursor, stop);
+    if (*stop) {
+        return;
     }
-    
-    if (*cursor + nodes.count - 1 >= index) {
-        return nodes[index - *cursor];
-    }
-
-    NSMutableArray *allChildNodes = [NSMutableArray array];
-    for (FETreeNode *node in nodes) {
-        [allChildNodes addObjectsFromArray:node.innerChildNodes];
-    }
-
-    *cursor += nodes.count;
-    return [self breadthFirstSearchNodeAtIndex:index nodes:allChildNodes cursor:cursor];
-}
-
-- (NSUInteger)depthFirstSearchIndexOfNode:(FETreeNode*)node cursor:(NSUInteger*)cursor {
-    if (self == node) {
-        return *cursor;
-    }
-    else {
-        for (FETreeNode *childNode in self.innerChildNodes) {
-            *cursor += 1;
-            NSUInteger index = [childNode depthFirstSearchIndexOfNode:node cursor:cursor];
-            if (index != NSNotFound) {
-                return index;
-            }
-        }
-    }
-    
-    return NSNotFound;
-}
-
-- (NSUInteger)breadthFirstSearchIndexOfNode:(FETreeNode*)node inNodes:(NSArray*)nodes cursor:(NSUInteger*)cursor {
-    if (nodes.count == 0) {
-        return NSNotFound;
-    }
-    
-    NSUInteger index = [nodes indexOfObject:node];
-    if (index != NSNotFound) {
-        return *cursor + index;
-    }
-    else {
-        NSMutableArray *allChildNodes = [NSMutableArray array];
-        for (FETreeNode *n in nodes) {
-            [allChildNodes addObjectsFromArray:n.innerChildNodes];
-        }
-        
-        *cursor += nodes.count;
-        return [self breadthFirstSearchIndexOfNode:node inNodes:allChildNodes cursor:cursor];
-    }
-}
-
-- (void)depthFirstEnumerateNodesUsingBlock:(FETreeNodeEnumerationBlock)aBlock indexPath:(NSIndexPath*)indexPath cursor:(NSUInteger*)cursor {
-    aBlock(self, indexPath, *cursor);
     
     for (NSInteger i=0; i<self.innerChildNodes.count; i++) {
         FETreeNode *childNode = self.innerChildNodes[i];
         NSIndexPath *childNodeIndexPath = [indexPath indexPathByAddingIndex:i];
         *cursor += 1;
-        [childNode depthFirstEnumerateNodesUsingBlock:aBlock indexPath:childNodeIndexPath cursor:cursor];
+        [childNode depthFirstEnumerateNodesUsingBlock:aBlock indexPath:childNodeIndexPath cursor:cursor stop:stop];
+        
+        if (*stop) {
+            return;
+        }
     }
 }
 
@@ -285,7 +224,11 @@
         FETreeNode *node = nodes[i];
         NSIndexPath *indexPath = indexPaths[i];
         
-        aBlock(node, indexPath, *cursor + i);
+        BOOL stop = NO;
+        aBlock(node, indexPath, *cursor+i, &stop);
+        if (stop) {
+            return;
+        }
         
         [allChildNodes addObjectsFromArray:node.innerChildNodes];
         for (NSInteger j=0; j<node.innerChildNodes.count; j++) {
