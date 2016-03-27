@@ -96,13 +96,18 @@
 }
 
 - (void)deleteChildNodeAtIndex:(NSUInteger)index {
-    FETreeNode *childNode = self.innerChildNodes[index];
-    [self.innerChildNodes removeObjectAtIndex:index];
-    childNode.innerParentNode = nil;
+    @try {
+        FETreeNode *childNode = self.innerChildNodes[index];
+        [self.innerChildNodes removeObjectAtIndex:index];
+        childNode.innerParentNode = nil;
+    }
+    @catch (NSException *e) {
+        //
+    }
 }
 
 - (void)deleteFromParent {
-    [self.innerChildNodes removeObject:self];
+    [self.innerParentNode.innerChildNodes removeObject:self];
     self.innerParentNode = nil;
 }
 
@@ -127,7 +132,7 @@
         
         return node;
     }
-    @catch (NSException *exception) {
+    @catch (NSException *e) {
         return nil;
     }
 }
