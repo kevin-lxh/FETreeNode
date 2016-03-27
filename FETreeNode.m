@@ -106,7 +106,7 @@
     }
 }
 
-- (void)deleteFromParent {
+- (void)deleteFromParentNode {
     [self.innerParentNode.innerChildNodes removeObject:self];
     self.innerParentNode = nil;
 }
