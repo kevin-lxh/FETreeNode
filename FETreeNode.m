@@ -104,6 +104,7 @@
         NSIndexPath *parentNodeIndexPath = [indexPath indexPathByRemovingLastIndex];
         FETreeNode *parentNode = [self nodeAtIndexPath:parentNodeIndexPath];
         [parentNode insertChildNode:childNode atIndex:lastIndex];
+        childNode.innerParentNode = self;
     }
     @catch (NSException *exception) {
         //
@@ -154,7 +155,7 @@
 
 - (void)enumerateNodesWithSearchType:(FETreeNodeSearchType)searchType usingBlock:(FETreeNodeEnumerationBlock)aBlock {
     NSUInteger cursor = 0;
-    NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathWithIndex:0];
     
     if (searchType == FETreeNodeSearchTypeDepthFirst) {
         BOOL stop = NO;
