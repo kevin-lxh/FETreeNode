@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+@class FETreeNode;
+
 typedef enum {
     FETreeNodeSearchTypeDepthFirst,
     FETreeNodeSearchTypeBreadthFirst
 } FETreeNodeSearchType;
+
+typedef void (^FETreeNodeEnumerationBlock) (FETreeNode *node, NSIndexPath *indexPath, NSUInteger index);
 
 @interface FETreeNode : NSObject
 
@@ -37,5 +41,7 @@ typedef enum {
 - (FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType;
 
 - (NSUInteger)indexOfNode:(FETreeNode*)node searchType:(FETreeNodeSearchType)searchType;
+
+- (void)enumerateNodesWithSearchType:(FETreeNodeSearchType)searchType usingBlock:(FETreeNodeEnumerationBlock)aBlock;
 
 @end
