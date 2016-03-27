@@ -28,6 +28,7 @@ typedef enum {
 
 - (void)appendChildNode:(FETreeNode*)childNode;
 - (void)insertChildNode:(FETreeNode*)childNode atIndex:(NSUInteger)index;
+- (void)insertChildNode:(FETreeNode *)childNode atIndexPath:(NSIndexPath*)indexPath;
 
 - (void)deleteChildNodeAtIndex:(NSUInteger)index;
 - (void)deleteFromParentNode;

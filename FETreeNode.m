@@ -95,13 +95,28 @@
     childNode.innerParentNode = self;
 }
 
+- (void)insertChildNode:(FETreeNode *)childNode atIndexPath:(NSIndexPath*)indexPath {
+    NSUInteger indexes[indexPath.length];
+    [indexPath getIndexes:indexes range:NSMakeRange(0, indexPath.length)];
+    
+    @try {
+        NSUInteger lastIndex = indexes[indexPath.length - 1];
+        NSIndexPath *parentNodeIndexPath = [indexPath indexPathByRemovingLastIndex];
+        FETreeNode *parentNode = [self nodeAtIndexPath:parentNodeIndexPath];
+        [parentNode insertChildNode:childNode atIndex:lastIndex];
+    }
+    @catch (NSException *exception) {
+        //
+    }
+}
+
 - (void)deleteChildNodeAtIndex:(NSUInteger)index {
     @try {
         FETreeNode *childNode = self.innerChildNodes[index];
         [self.innerChildNodes removeObjectAtIndex:index];
         childNode.innerParentNode = nil;
     }
-    @catch (NSException *e) {
+    @catch (NSException *exception) {
         //
     }
 }
@@ -132,7 +147,7 @@
         
         return node;
     }
-    @catch (NSException *e) {
+    @catch (NSException *exception) {
         return nil;
     }
 }
