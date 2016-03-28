@@ -127,7 +127,7 @@
     self.innerParentNode = nil;
 }
 
-- (FETreeNode*)nodeAtIndexPath:(NSIndexPath*)indexPath {
+- (__kindof FETreeNode*)nodeAtIndexPath:(NSIndexPath*)indexPath {
     if (indexPath.length == 0) {
         return nil;
     }
@@ -166,7 +166,7 @@
     }
 }
 
-- (FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType {
+- (__kindof FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType {
     __block FETreeNode *result = nil;
     [self enumerateNodesWithSearchType:searchType
                             usingBlock:^(FETreeNode *node, NSIndexPath *indexPath, NSUInteger i, BOOL *stop) {

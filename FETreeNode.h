@@ -15,7 +15,7 @@ typedef enum {
     FETreeNodeSearchTypeBreadthFirst
 } FETreeNodeSearchType;
 
-typedef void (^FETreeNodeEnumerationBlock) (FETreeNode *node, NSIndexPath *indexPath, NSUInteger index, BOOL *stop);
+typedef void (^FETreeNodeEnumerationBlock) (__kindof FETreeNode *node, NSIndexPath *indexPath, NSUInteger index, BOOL *stop);
 
 @interface FETreeNode : NSObject
 
@@ -37,8 +37,8 @@ typedef void (^FETreeNodeEnumerationBlock) (FETreeNode *node, NSIndexPath *index
 - (void)deleteChildNodeAtIndex:(NSUInteger)index;
 - (void)deleteFromParentNode;
 
-- (FETreeNode*)nodeAtIndexPath:(NSIndexPath*)indexPath;
-- (FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType;
+- (__kindof FETreeNode*)nodeAtIndexPath:(NSIndexPath*)indexPath;
+- (__kindof FETreeNode*)nodeAtIndex:(NSUInteger)index searchType:(FETreeNodeSearchType)searchType;
 
 - (NSUInteger)indexOfNode:(FETreeNode*)node searchType:(FETreeNodeSearchType)searchType;
 
