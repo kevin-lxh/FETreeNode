@@ -104,7 +104,7 @@
         NSIndexPath *parentNodeIndexPath = [indexPath indexPathByRemovingLastIndex];
         FETreeNode *parentNode = [self nodeAtIndexPath:parentNodeIndexPath];
         [parentNode insertChildNode:childNode atIndex:lastIndex];
-        childNode.innerParentNode = self;
+        childNode.innerParentNode = parentNode;
     }
     @catch (NSException *exception) {
         //
